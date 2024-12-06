@@ -1,0 +1,182 @@
+/* استایل‌های عمومی */
+.recipe-meta {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.recipe-meta i {
+    font-size: 1.5rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+/* استایل‌های مواد لازم */
+.ingredients-section {
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.ingredients-section:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.ingredients-section h3 {
+    color: #2c3e50;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.ingredient-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+.ingredient-item:hover {
+    background-color: #f8f9fa;
+}
+
+.ingredient-amount {
+    color: #2980b9;
+    font-weight: bold;
+    min-width: 80px;
+}
+
+.ingredient-unit {
+    color: #7f8c8d;
+    min-width: 80px;
+}
+
+.ingredient-name {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.ingredient-notes {
+    font-style: italic;
+    color: #95a5a6;
+}
+
+/* استایل‌های دسته‌بندی و برچسب‌ها */
+.category-link {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    margin: 0.25rem;
+    border-radius: 1rem;
+    background-color: #e9d5ff;
+    color: #6b21a8;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.category-link:hover {
+    background-color: #9333ea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.tag-link {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    margin: 0.25rem;
+    border-radius: 1rem;
+    background-color: #dcfce7;
+    color: #166534;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.tag-link:hover {
+    background-color: #16a34a;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* استایل‌های نظرات */
+.comments-section {
+    margin-top: 3rem;
+}
+
+.comment-item {
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.comment-item:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.comment-date {
+    color: #7f8c8d;
+    font-size: 0.875rem;
+}
+
+.comment-rating {
+    color: #f39c12;
+}
+
+.comment-content {
+    padding: 1rem;
+}
+
+/* استایل‌های دکمه‌های تعامل */
+.interaction-buttons {
+    margin: 2rem 0;
+    padding: 1rem;
+    border-top: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.btn-like,
+.btn-bookmark {
+    transition: all 0.3s ease;
+}
+
+.btn-like:hover,
+.btn-bookmark:hover {
+    transform: scale(1.05);
+}
+
+/* استایل‌های واکنش‌گرا */
+@media (max-width: 576px) {
+    .ingredient-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .ingredient-amount,
+    .ingredient-unit {
+        min-width: auto;
+        margin-bottom: 0.25rem;
+    }
+    
+    .comment-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .comment-date {
+        margin-top: 0.5rem;
+    }
+}

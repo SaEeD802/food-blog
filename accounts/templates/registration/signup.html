@@ -1,0 +1,30 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2>ثبت‌نام</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-success btn-block">
+                            <i class="fas fa-user-plus ml-1"></i> ثبت‌نام
+                        </button>
+                    </form>
+                    <hr>
+                    <p class="text-center">
+                        قبلاً ثبت‌نام کرده‌اید؟ 
+                        <a href="{% url 'accounts:login' %}">وارد شوید</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

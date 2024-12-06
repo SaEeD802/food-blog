@@ -1,0 +1,88 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+    <div class="container mt-4">
+        <!-- فیلترها و جستجو -->
+        <div class="filters mb-4">
+            <form method="get" class="form-inline">
+                <div class="form-group ml-2">
+                    <label for="category" class="ml-2">دسته‌بندی:</label>
+                    <select name="category" id="category" class="form-control">
+                        <option value="">همه دسته‌بندی‌ها</option>
+                        {% for category in categories %}
+                            <option value="{{ category.slug }}" {% if category.slug == current_category %}selected{% endif %}>
+                                <i class="{{ category.icon }}"></i> {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group ml-2">
+                    <label for="difficulty" class="ml-2">سطح سختی:</label>
+                    <select name="difficulty" id="difficulty" class="form-control">
+                        <option value="">همه سطوح</option>
+                        <option value="easy" {% if current_difficulty == 'easy' %}selected{% endif %}>آسان</option>
+                        <option value="medium" {% if current_difficulty == 'medium' %}selected{% endif %}>متوسط</option>
+                        <option value="hard" {% if current_difficulty == 'hard' %}selected{% endif %}>سخت</option>
+                    </select>
+                </div>
+
+                <div class="form-group ml-2">
+                    <label for="search" class="ml-2">جستجو:</label>
+                    <input type="text" name="search" id="search" class="form-control" placeholder="جستجو در دستورها..." 
+                           value="{{ search_query|default:'' }}">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter ml-1"></i>
+                    اعمال فیلتر
+                </button>
+            </form>
+        </div>
+
+        <!-- برچسب‌های محبوب -->
+        <div class="tags mb-4">
+            {% for tag in tags %}
+                <a href="?tag={{ tag.slug }}" class="badge badge-secondary mr-1 {% if tag.slug == current_tag %}active{% endif %}">
+                    #{{ tag.name }}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- لیست پست‌ها -->
+        <div class="row">
+            {% for post in posts %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        {% if post.cover_image %}
+                            <img src="{{ post.cover_image.url }}" class="card-img-top" alt="{{ post.title }}"
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                                 style="height: 200px;">
+                                <i class="fas fa-utensils fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text text-muted">
+                                <small>
+                                    <i class="fas fa-clock ml-1"></i> زمان کل: {{ post.total_time }} دقیقه
+                                    <span class="mx-2">|</span>
+                                    <i class="fas fa-signal ml-1"></i> {{ post.get_difficulty_display }}
+                                </small>
+                            </p>
+                            <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-outline-primary stretched-link">
+                                مشاهده دستور
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center">
+                    <p>هیچ پستی یافت نشد.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

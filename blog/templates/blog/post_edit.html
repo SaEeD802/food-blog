@@ -1,0 +1,143 @@
+{% extends 'blog/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">{% if form.instance.pk %}ویرایش پست{% else %}پست جدید{% endif %}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.title|as_crispy_field }}
+                                {{ form.category|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.difficulty|as_crispy_field }}
+                                {{ form.calories|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.prep_time|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.cook_time|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.servings|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.cover_image|as_crispy_field }}
+                                {% if form.instance.cover_image %}
+                                    <div class="mb-3">
+                                        <img src="{{ form.instance.cover_image.url }}" class="img-thumbnail" style="max-height: 200px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.image|as_crispy_field }}
+                                {% if form.instance.image %}
+                                    <div class="mb-3">
+                                        <img src="{{ form.instance.image.url }}" class="img-thumbnail" style="max-height: 200px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {{ form.content|as_crispy_field }}
+                        {{ form.tags|as_crispy_field }}
+
+                        <!-- مواد اولیه -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h4 class="mb-0">مواد اولیه</h4>
+                            </div>
+                            <div class="card-body">
+                                {{ ingredient_formset.management_form }}
+                                <div id="ingredient-forms">
+                                    {% for ingredient_form in ingredient_formset %}
+                                        <div class="ingredient-form mb-3 border-bottom pb-3">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    {{ ingredient_form.ingredient|as_crispy_field }}
+                                                </div>
+                                                <div class="col-md-4">
+                                                    {{ ingredient_form.amount|as_crispy_field }}
+                                                </div>
+                                                <div class="col-md-4">
+                                                    {{ ingredient_form.notes|as_crispy_field }}
+                                                </div>
+                                            </div>
+                                            {% if ingredient_form.instance.pk %}
+                                                {{ ingredient_form.DELETE|as_crispy_field }}
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="btn btn-info" id="add-ingredient">
+                                    <i class="fas fa-plus"></i> افزودن ماده اولیه
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save ml-1"></i> ذخیره
+                            </button>
+                            <a href="{% url 'blog:post_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times ml-1"></i> انصراف
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    var totalForms = $('#id_ingredients-TOTAL_FORMS');
+    var formNum = parseInt(totalForms.val());
+    
+    $('#add-ingredient').click(function() {
+        var newForm = $('.ingredient-form:first').clone(true);
+        
+        // پاک کردن مقادیر فرم
+        newForm.find('input').val('');
+        
+        // بروزرسانی شناسه‌ها و نام‌های فیلدها
+        newForm.find('input, select').each(function() {
+            var name = $(this).attr('name').replace('-0-', '-' + formNum + '-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id});
+        });
+        
+        newForm.find('label').each(function() {
+            var newFor = $(this).attr('for').replace('-0-', '-' + formNum + '-');
+            $(this).attr('for', newFor);
+        });
+        
+        // اضافه کردن فرم جدید
+        $('#ingredient-forms').append(newForm);
+        
+        // بروزرسانی تعداد کل فرم‌ها
+        formNum++;
+        totalForms.val(formNum);
+    });
+});
+</script>
+{% endblock %}

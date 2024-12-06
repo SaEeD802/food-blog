@@ -1,0 +1,399 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+{% load jalali_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- عنوان و تصویر اصلی -->
+            <h1 class="mb-4">{{ post.title }}</h1>
+            {% if post.image %}
+                <img src="{{ post.image.url }}" class="img-fluid rounded mb-4" alt="{{ post.title }}">
+            {% endif %}
+
+            <!-- اطلاعات پایه -->
+            <div class="recipe-meta bg-light p-3 rounded mb-4">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-clock"></i>
+                        <p>زمان آماده‌سازی</p>
+                        <h5>{{ post.prep_time }} دقیقه</h5>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-fire"></i>
+                        <p>زمان پخت</p>
+                        <h5>{{ post.cook_time }} دقیقه</h5>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-users"></i>
+                        <p>تعداد نفرات</p>
+                        <h5>{{ post.servings }} نفر</h5>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <i class="fas fa-signal"></i>
+                        <p>سطح سختی</p>
+                        <h5>{{ post.get_difficulty_display }}</h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- مواد لازم -->
+            <div class="ingredients-section bg-white p-4 rounded mb-4 shadow-sm">
+                <h3 class="mb-4 border-bottom pb-2">
+                    <i class="fas fa-mortar-pestle me-2"></i>
+                    مواد لازم
+                </h3>
+                <div class="ingredients-list">
+                    {% for ingredient in post.ingredients.all %}
+                    <div class="ingredient-item d-flex align-items-center py-2 border-bottom">
+                        <div class="ingredient-amount text-primary fw-bold" style="min-width: 80px;">
+                            {{ ingredient.amount|floatformat:"2" }}
+                        </div>
+                        <div class="ingredient-unit text-muted" style="min-width: 80px;">
+                            {{ ingredient.ingredient.unit }}
+                        </div>
+                        <div class="ingredient-name flex-grow-1">
+                            {{ ingredient.ingredient.name }}
+                        </div>
+                        {% if ingredient.notes %}
+                        <div class="ingredient-notes">
+                            <small class="text-muted fst-italic">
+                                ({{ ingredient.notes }})
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <style>
+                .ingredients-section {
+                    border: 1px solid #e9ecef;
+                    transition: all 0.3s ease;
+                }
+                
+                .ingredients-section:hover {
+                    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                }
+                
+                .ingredients-section h3 {
+                    color: #2c3e50;
+                }
+                
+                .ingredient-item {
+                    transition: background-color 0.2s ease;
+                }
+                
+                .ingredient-item:hover {
+                    background-color: #f8f9fa;
+                }
+                
+                .ingredient-amount {
+                    color: #2980b9;
+                    font-family: 'Vazir', sans-serif;
+                }
+                
+                .ingredient-unit {
+                    color: #7f8c8d;
+                }
+                
+                .ingredient-name {
+                    font-weight: 500;
+                }
+                
+                .ingredient-notes {
+                    color: #95a5a6;
+                    font-style: italic;
+                }
+                
+                @media (max-width: 576px) {
+                    .ingredient-item {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        padding: 0.5rem 0;
+                    }
+                    
+                    .ingredient-amount,
+                    .ingredient-unit {
+                        min-width: auto;
+                        margin-bottom: 0.25rem;
+                    }
+                }
+            </style>
+
+            <!-- دستور پخت -->
+            <div class="cooking-instructions mb-4">
+                <h3 class="mb-3">دستور پخت</h3>
+                <div class="content">
+                    {{ post.content|linebreaks }}
+                </div>
+            </div>
+
+            <!-- دکمه‌های تعامل -->
+            <div class="interaction-buttons mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <form action="{% url 'blog:post_like' slug=post.slug %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="{% if user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i> پسندیدن
+                                <span class="badge bg-danger">{{ post.likes.count }}</span>
+                            </button>
+                        </form>
+                        <form action="{% url 'blog:post_bookmark' slug=post.slug %}" method="POST" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-info">
+                                <i class="{% if user in post.bookmarks.all %}fas{% else %}far{% endif %} fa-bookmark"></i> ذخیره
+                                <span class="badge bg-info">{{ post.bookmarks.count }}</span>
+                            </button>
+                        </form>
+                    </div>
+                    {% if user.is_authenticated and post.author == user %}
+                    <div>
+                        <a class="btn btn-warning" href="{% url 'blog:post_edit' slug=post.slug %}">
+                            <i class="fas fa-edit"></i> ویرایش
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- نظرات -->
+            <div class="comments-section mt-5">
+                <h3 class="mb-4">
+                    <i class="fas fa-comments me-2"></i>
+                    نظرات کاربران
+                </h3>
+                
+                {% if user.is_authenticated %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">نظر خود را بنویسید</h5>
+                        <form method="POST" action="{% url 'blog:add_comment_to_post' pk=post.pk %}">
+                            {% csrf_token %}
+                            <div class="form-group mb-3">
+                                <label for="id_text" class="form-label">متن نظر:</label>
+                                <textarea name="text" id="id_text" class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="id_rating" class="form-label">امتیاز (اختیاری):</label>
+                                <input type="number" name="rating" id="id_rating" class="form-control" min="1" max="5" placeholder="امتیاز بین 1 تا 5">
+                                <small class="text-muted">امتیاز بین 1 تا 5 (اختیاری)</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>
+                                ارسال نظر
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    برای ثبت نظر لطفاً <a href="{% url 'accounts:login' %}">وارد شوید</a>
+                </div>
+                {% endif %}
+
+                <div class="comments-list">
+                    {% for comment in post.comments.all %}
+                    <div class="comment-item card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="card-subtitle">
+                                    <i class="fas fa-user me-1"></i>
+                                    {{ comment.author }}
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ comment.created_date|jalali_date }}
+                                </small>
+                            </div>
+                            {% if comment.rating %}
+                            <div class="rating mb-2">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= comment.rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <p class="card-text">{{ comment.text|linebreaksbr }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-light text-center">
+                        <i class="fas fa-comments me-2"></i>
+                        هنوز نظری ثبت نشده است. اولین نفری باشید که نظر می‌دهید!
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="sidebar">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-user me-2"></i>درباره نویسنده
+                        </h5>
+                        <p class="card-text">{{ post.author.username }}</p>
+                        <p class="card-text mb-0">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                تاریخ ایجاد: {{ post.created_date|jalali_date }}
+                            </small>
+                        </p>
+                    </div>
+                </div>
+                {% if post.category %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-folder me-2"></i>دسته‌بندی
+                        </h5>
+                        <p class="card-text mb-0">
+                            <a href="{% url 'blog:post_list' %}?category={{ post.category.slug }}" class="category-link">
+                                {{ post.category.name }}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if post.tags.all %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-tags me-2"></i>برچسب‌ها
+                        </h5>
+                        <div class="tags">
+                            {% for tag in post.tags.all %}
+                            <a href="{% url 'blog:post_list' %}?tag={{ tag.slug }}" class="tag-link">
+                                <span class="tag-badge">{{ tag.name }}</span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- استایل‌های اختصاصی -->
+<style>
+    .recipe-meta i {
+        font-size: 24px;
+        color: #007bff;
+        margin-bottom: 10px;
+    }
+    
+    .recipe-meta p {
+        margin-bottom: 5px;
+        color: #666;
+    }
+    
+    .cooking-instructions .content {
+        line-height: 1.8;
+        text-align: justify;
+    }
+    
+    .interaction-buttons .btn {
+        transition: all 0.3s;
+    }
+    
+    .interaction-buttons .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .comments-section .comment {
+        transition: all 0.3s;
+    }
+    
+    .comments-section .comment:hover {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar .card {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        border: 1px solid rgba(0,0,0,.125);
+    }
+    
+    .sidebar .card:hover {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .sidebar .card-title {
+        color: #2c3e50;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+    
+    .sidebar .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.7rem;
+        transition: all 0.2s ease;
+        background-color: #6c757d;
+    }
+    
+    .sidebar .badge:hover {
+        opacity: 0.9;
+        background-color: #5a6268;
+    }
+    
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .category-link {
+        text-decoration: none;
+        color: #6c5ce7;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        background-color: #f3f0ff;
+    }
+    
+    .category-link:hover {
+        background-color: #6c5ce7;
+        color: white;
+    }
+    
+    .tag-link {
+        text-decoration: none;
+        margin: 0 2px 5px 0;
+    }
+    
+    .tag-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 15px;
+        background-color: #a8e6cf;
+        color: #2d3436;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .tag-badge:hover {
+        background-color: #88d7b5;
+        transform: translateY(-1px);
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            margin-top: 2rem;
+        }
+    }
+</style>
+{% endblock %}
